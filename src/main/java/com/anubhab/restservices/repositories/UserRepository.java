@@ -9,5 +9,7 @@ import com.anubhab.restservices.entities.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 	
 	User findByUsername(String username);
+	
+	User findByssn(String ssn);
 
 }
