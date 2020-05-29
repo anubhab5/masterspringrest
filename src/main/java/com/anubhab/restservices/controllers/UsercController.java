@@ -3,8 +3,12 @@ package com.anubhab.restservices.controllers;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,10 +20,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.anubhab.restservices.entities.User;
 import com.anubhab.restservices.exceptions.UserAlreadyExistException;
+import com.anubhab.restservices.exceptions.UserNameNotFoundException;
 import com.anubhab.restservices.exceptions.UserNotFoundException;
 import com.anubhab.restservices.services.UserService;
 
 @RestController
+@Validated
 public class UsercController {
 
 	@Autowired
@@ -31,7 +37,7 @@ public class UsercController {
 	}
 
 	@GetMapping("/users/{id}")
-	public Optional<User> getUserById(@PathVariable("id") Long id) {
+	public Optional<User> getUserById(@PathVariable("id") @Min(1) Long id) {
 		try {
 			return userSvc.getUserById(id);
 		} catch (UserNotFoundException e) {
@@ -40,7 +46,7 @@ public class UsercController {
 	}
 
 	@PostMapping("/users")
-	public User saveUser(@RequestBody User user) {
+	public User saveUser(@RequestBody @Valid User user) {
 		try {
 			return userSvc.createUser(user);
 		} catch (UserAlreadyExistException e) {
@@ -59,8 +65,11 @@ public class UsercController {
 	}
 
 	@GetMapping("users/byuser/{username}")
-	public User getUserByUsername(@PathVariable("username") String username) {
+	public User getUserByUsername(@PathVariable("username") String username) throws UserNameNotFoundException {
+		User user = userSvc.getUserByUsername(username);
+		if (user == null) {
+			throw new UserNameNotFoundException("User " + username + " does not Exist");
+		}
 		return userSvc.getUserByUsername(username);
 	}
-
 }
